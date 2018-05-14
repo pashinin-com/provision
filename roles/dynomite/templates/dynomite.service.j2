@@ -1,0 +1,22 @@
+# -*- mode: conf -*-
+[Unit]
+Description=Dynomite
+Requires=network-online.target
+After=network.target
+
+[Service]
+# User=consul
+# Group=consul
+PIDFile=/run/dynomite/dynomite.pid
+Restart=on-failure
+Environment=GOMAXPROCS=2
+
+# -v, --verbosity=N       : set logging level (default: 5, min: 0, max: 11)
+ExecStart=/usr/bin/dynomite --verbosity=0 -c /etc/dynomite/dynomite.conf
+
+ExecReload=/bin/kill -s HUP $MAINPID
+KillSignal=SIGTERM
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target

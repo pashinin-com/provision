@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  remote_user: root
+  connection: local
+  gather_facts: yes
+  become: true
+  become_user: root
+
+  vars:
+    http_port: 80
+    max_clients: 200
+
+  roles:
+    - consul
+    - redis
+
+  tasks:
+    - name: postgres 10 key
+      apt_key:
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        state: present
+    - apt_repository:
+        repo: deb http://apt.postgresql.org/pub/repos/apt/ {{ansible_distribution_release}}-pgdg main
+        state: present
+    - apt: name=postgresql-10 state=installed allow_unauthenticated=yes

@@ -1,0 +1,59 @@
+# -*- mode: yaml -*-
+dyn_o_mite:
+  datacenter: moscow
+  rack: rack{{inventory_hostname}}
+
+  # The listening address and port (name:port or ip:port) for this server pool.
+  # listen: 127.0.0.1:8102
+  listen: 0.0.0.0:8102
+
+  # The port that dynomite nodes use to inter-communicate and gossip.
+  # dyn_listen: 127.0.0.1:8101
+  dyn_listen: 0.0.0.0:8101
+
+  dyn_seeds:
+    - 10.254.239.1:8101:rack10.254.239.1:moscow:101134286
+    - 10.254.239.2:8101:rack10.254.239.2:moscow:101134286
+    - 10.254.239.3:8101:rack10.254.239.3:moscow:101134286
+
+
+  # The token(s) owned by a node. Currently, we don't support vnode yet
+  # so this only works with one token for the time being.
+  tokens: '101134286'
+
+  # A list of local server address, port and weight (name:port:weight or
+  # ip:port:weight) for this server pool. Currently, there is just one.
+  servers:
+    - 127.0.0.1:6379:1
+    # - 10.254.239.1:6379:1
+    # - 10.254.239.2:6379:1
+    # - 10.254.239.3:6379:1
+
+  # An integer value that controls if a server pool speaks redis (0) or
+  # memcached (1) or other protocol. Defaults to redis (0).
+  data_store: 0
+
+  # size of mbuf chunk in bytes (default: 16384 bytes).
+  mbuf_size: 16384
+
+  # Deprecated
+  # max number of messages to allocate (default: 200000).
+  # max_msgs: 300000
+
+  stats_listen: 0.0.0.0:22222
+
+  # DC_ONE DC_SAFE_QUORUM DC_QUORUM
+  read_consistency: DC_ONE
+  write_consistency: DC_ONE
+
+
+  auto_eject_hosts: true
+  server_retry_timeout: 1000     # default: 30s (30000)
+  server_failure_limit: 1        # default: 3
+
+  # By default, dynomite waits indefinitely for any request sent to the
+  # server. However, when timeout: key is configured, a requests for
+  # which no response is received from the server in timeout: msec is
+  # timedout and an error response SERVER_ERROR Connection timed out\r\n
+  # is sent back to the client.
+  timeout: 400
