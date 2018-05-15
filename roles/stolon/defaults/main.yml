@@ -1,0 +1,5 @@
+vars:
+  exclusions:
+    - ./doc
+    - ./examples
+    - ./README.md

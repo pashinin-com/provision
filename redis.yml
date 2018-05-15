@@ -1,0 +1,11 @@
+---
+- hosts: redis
+  strategy: free
+  remote_user: root
+  # connection: local
+  gather_facts: yes
+  become: true
+  become_user: root
+
+  roles:
+    - {role: redis, tags: [ 'redis' ]}

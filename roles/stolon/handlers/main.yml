@@ -1,0 +1,8 @@
+- name: restart stolon-proxy
+  systemd: name=stolon-proxy state=restarted
+
+- name: restart stolon-sentinel
+  systemd: name=stolon-sentinel state=restarted
+
+- name: restart stolon-keeper
+  systemd: name=stolon-keeper state=restarted

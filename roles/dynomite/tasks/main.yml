@@ -9,6 +9,15 @@
   register: makefile
 
 
+- name: Some deps
+  apt: name={{item}} state=present
+  with_items:
+    - python-apt
+    - autoconf
+    - libssl-dev
+    - libtool
+
+
 # - name: Clone dynomite repo
 #   shell: git clone --depth=1 https://github.com/Netflix/dynomite.git /usr/src/dynomite
 #   when: not dir.stat.exists
@@ -16,18 +25,10 @@
   git:
     repo: 'https://github.com/Netflix/dynomite.git'
     dest: /usr/src/dynomite
-    version: v0.6.0
+    version: v0.6.7
 
 - stat: path=/usr/src/dynomite/Makefile
   register: makefile
-
-
-
-- name: Some deps
-  apt: name={{item}} state=installed
-  with_items:
-    - autoconf
-    - libssl-dev
 
 - name: Configure 1
   shell: autoreconf -fvi
@@ -48,6 +49,7 @@
     chdir: /usr/src/dynomite
     creates: src/dynomite
   when: not bin.stat.exists
+  # Does not work on Debian with OpenSSL 1.1.x, only with 1.0.x
 
 
 - copy:

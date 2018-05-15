@@ -1,0 +1,94 @@
+- stat: path=/usr/local/bin/stolonctl2
+  register: stolonctl
+- stat: path=/tmp/stolon/stolon-v0.10.0-linux-amd64
+  register: archive
+
+
+- name: Stolon home dir
+  file:
+    path: /var/lib/stolon
+    state: directory
+    mode: 0755
+    owner: postgres
+
+- name: Postgres db dir
+  file:
+    path: /var/lib/stolon/postgres
+    state: directory
+    mode: 0700
+    owner: postgres
+
+- name: Temp dir
+  file:
+    path: /tmp/stolon
+    state: directory
+    mode: 0755
+  when: not stolonctl.stat.exists
+
+- name: Download and extract Stolon
+  unarchive:
+    src: https://github.com/sorintlab/stolon/releases/download/v0.10.0/stolon-v0.10.0-linux-amd64.tar.gz
+    # src: https://github.com/sorintlab/stolon/releases/download/v0.7.0/stolon-v0.7.0-linux-amd64.tar.gz
+    dest: /tmp/stolon
+    remote_src: yes
+  when: not archive.stat.exists and not stolonctl.stat.exists
+
+- name: Copy binaries
+  copy:
+    src: "{{ item }}"
+    dest: /usr/local/bin/
+    owner: root
+    mode: 755
+  with_fileglob:
+    - /tmp/stolon/stolon-v0.10.0-linux-amd64/bin/*
+  when: not stolonctl.stat.exists
+
+- name: stolon-proxy systemd script
+  template:
+    src: templates/systemd-proxy.j2
+    dest: /etc/systemd/system/stolon-proxy.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart stolon-proxy
+
+- name: start and enable proxy
+  systemd:
+    name: stolon-proxy
+    state: started
+    enabled: yes
+
+
+- name: stolon-sentinel systemd script
+  template:
+    src: templates/systemd-sentinel.j2
+    dest: /etc/systemd/system/stolon-sentinel.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart stolon-sentinel
+
+- name: start and enable sentinel
+  systemd:
+    name: stolon-sentinel
+    state: started
+    enabled: yes
+
+
+- name: stolon-keeper systemd script
+  template:
+    src: templates/systemd-keeper.j2
+    dest: /etc/systemd/system/stolon-keeper.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart stolon-keeper
+
+- name: start and enable keeper
+  systemd:
+    name: stolon-keeper
+    state: started
+    enabled: yes
