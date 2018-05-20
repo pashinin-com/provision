@@ -75,6 +75,27 @@ Downloads v0.10.0, extracts under /tmp/stolon/, copies bin files
    ansible-playbook stolon.yml -i hosts --limit '10.254.239.2' -f 10 --check
 
 
+Tarantool
+---------
+
+.. code-block:: bash
+
+   # Install
+   ansible-playbook tarantool.yml -i hosts -f 10 --check
+   ansible-playbook tarantool.yml -i hosts --limit '10.254.239.2' -f 10 --check
+
+
+Openresty
+---------
+
+Nginx + Lua + some stuff
+
+.. code-block:: bash
+
+   # Install
+   ansible-playbook openresty.yml -i hosts --limit '10.254.239.2' -f 10 --check
+
+
 Dynomite
 --------
 

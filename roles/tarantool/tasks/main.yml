@@ -1,0 +1,15 @@
+- name: Add Tarantool signing key
+  apt_key:
+    url: http://download.tarantool.org/tarantool/1.9/gpgkey
+    state: present
+
+- name: Add Tarantool repository
+  apt_repository:
+    # https://tarantool.io/en/download/os-installation/1.9/debian.html
+    # https://tarantool.io/en/download/os-installation/1.9/ubuntu.html
+    repo: deb http://download.tarantool.org/tarantool/1.9/{{ansible_distribution.lower()}}/ {{ansible_distribution_release}} main
+    state: present
+
+- name: Install Tarantool
+  apt: name=tarantool state=present
+  # allow_unauthenticated=yes

@@ -1,0 +1,17 @@
+- name: Add Openresty signing key
+  apt_key:
+    url: https://openresty.org/package/pubkey.gpg
+    state: present
+
+- name: Add Openresty repository
+  apt_repository:
+    # deb http://openresty.org/package/debian $(lsb_release -sc) openresty
+    repo: deb http://openresty.org/package/{{ansible_distribution.lower()}}/ {{ansible_distribution_release}} openresty
+    state: present
+
+- name: Remove Nginx
+  apt: name=nginx state=absent
+
+- name: Install Openresty
+  apt: name=openresty state=present
+  # allow_unauthenticated=yes
