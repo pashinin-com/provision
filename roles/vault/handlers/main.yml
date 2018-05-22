@@ -1,0 +1,2 @@
+- name: restart vault
+  systemd: name=vault state=restarted

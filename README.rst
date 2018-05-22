@@ -48,6 +48,14 @@ Downloads Consul and `consul-template`, installs it under
       # Install Redis only at one host
       ansible-playbook redis.yml -i hosts --limit '10.254.239.2' -f 10 --check
 
+Vault
+-----
+
+.. code-block:: bash
+
+   # Install Vault only at one host
+   ansible-playbook vault.yml -i hosts --limit '10.254.239.2' -f 10 --check
+
 
 PostgreSQL
 ----------

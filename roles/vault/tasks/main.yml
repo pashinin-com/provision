@@ -1,0 +1,53 @@
+# https://releases.hashicorp.com/consul/1.0.0/consul_1.0.0_linux_amd64.zip
+- stat: path=/usr/local/bin/vault
+  register: vault
+
+- name: Vault version
+  shell: /usr/local/bin/vault version
+  register: v
+  ignore_errors: yes
+  no_log: True
+  changed_when: False
+
+- name: Install Vault
+  unarchive:
+    src: https://releases.hashicorp.com/vault/{{version}}/vault_{{version}}_linux_amd64.zip
+    dest: /usr/local/bin
+    remote_src: yes
+  when: not vault.stat.exists or version not in v.stdout
+
+
+- name: Create /etc/vault.d
+  file:
+    path: /etc/vault.d
+    state: directory
+    mode: 0755
+
+
+- name: Vault systemd
+  copy:
+    src: files/systemd-vault.service
+    dest: /etc/systemd/system/vault.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart vault
+
+- name: Vault config.hcl
+  copy:
+    src: files/vault.config.hcl
+    dest: /etc/vault.d/config.hcl
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart vault
+
+
+- name: start and enable Vault
+  systemd:
+    name: vault
+    state: started
+    enabled: yes
+    daemon_reload: yes
