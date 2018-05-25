@@ -40,8 +40,11 @@ Downloads Consul and `consul-template`, installs it under
    # Install Consul Agent at one host only
    ansible-playbook consul.yml -i hosts --limit '10.254.239.4' --check
 
-   # Install Consul Server at one host only (use max 3-5 servers in 1 DC)
+   # Install Consul Server at 1 hosts (use max 3-5 servers in 1 DC)
    ansible-playbook consul.yml -i hosts --limit '10.254.239.2' --extra-vars "mode=server" --check
+
+   # Install Consul Server at 3 hosts (use max 3-5 servers in 1 DC)
+   ansible-playbook consul.yml -i hosts --limit '10.254.239.1,10.254.239.2,10.254.239.3' --extra-vars "mode=server" --check
 
    # Check Consul (will list alive and failed nodes)
    consul members

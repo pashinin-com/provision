@@ -1,15 +1,26 @@
-# https://releases.hashicorp.com/consul/1.0.0/consul_1.0.0_linux_amd64.zip
-- stat: path=/usr/local/bin/consul
-  register: binfile
-- stat: path=/usr/local/bin/consul-template
+- name: Check consul binary file exist
+  stat: path=/usr/local/bin/consul
+  register: consul
+- name: Check consul-template binary file exist
+  stat: path=/usr/local/bin/consul-template
   register: consultemplate
 
-- name: Install consul
+- name: Check installed version of Consul and save it in "currentversion"
+  shell: consul version | grep Consul | cut -d' ' -f2 | cut -d'v' -f2
+  register: cv
+  ignore_errors: yes
+  no_log: True
+  changed_when: False
+  when: consul.stat.exists
+- set_fact: currentversion={{cv.stdout|default('')}}
+  when: cv is defined
+
+- name: "Download and install Consul {{version}}, current version: {{currentversion}}"
   unarchive:
-    src: https://releases.hashicorp.com/consul/1.0.0/consul_1.0.0_linux_amd64.zip
+    src: https://releases.hashicorp.com/consul/{{version}}/consul_{{version}}_linux_amd64.zip
     dest: /usr/local/bin
     remote_src: yes
-  when: not binfile.stat.exists
+  when: not consul.stat.exists or version != currentversion
 
 - name: Install consul-template
   unarchive:
@@ -75,7 +86,7 @@
 
 # 1. Error while starting Consul Agent: data_dir cannot be empty!
 #    Why happened: agent config was missing
-- name: Consul server configuration
+- name: Consul {{mode}} configuration
   template:
     src: templates/config.j2
     dest: /etc/consul.d/{{mode}}/config.hcl
@@ -104,7 +115,7 @@
     - restart consul-template
 
 
-- name: start and enable Consul
+- name: start and enable Consul {{mode}}
   systemd:
     name: consul
     state: started

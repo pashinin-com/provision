@@ -42,6 +42,10 @@ addresses {
 # }
 enable_script_checks = true
 
+
+# Error on Consul v1.1.0: invalid config key services[0].checks[0].script
+# Solution: "script" removed, use args since 1.1.0
+# Like Python's subprocess Popen([...])
 services = [
   {
     id = "red0"
@@ -53,7 +57,7 @@ services = [
     port = 6000
     checks = [
       {
-        script = "service redis-server status"
+        args = ["service", "redis-server", "status"]
         interval = "60s"
       }
     ]
@@ -68,7 +72,7 @@ services = [
     port = 80
     checks = [
       {
-        script = "service nginx status"
+        args = ["service", "nginx", "status"]
         interval = "60s"
       }
     ]
