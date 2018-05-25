@@ -23,17 +23,25 @@ Note 3: add `--tags "consul"` to run only tasks marked by "consul" tag.
 Consul
 ------
 
+Consul agent may run in one of two modes: client or server. There should
+be 3-5 servers in a datacenter and agents running on all other
+nodes (server is an agent too).
+
 Downloads Consul and `consul-template`, installs it under
-`/usr/local/bin/`, creates systemd scripts `consul` and
-`consul-template`, starts Consul.
+`/usr/local/bin/`, creates systemd scripts for `consul` and
+`consul-template`, starts both.
+
 
 .. code-block:: bash
 
-   # Install Consul at all "consul" hosts (defined in inventory)
-   ansible-playbook consul.yml -i hosts -f 10 --check
+   # Install Consul Agent on all "consul" hosts (defined in inventory)
+   ansible-playbook consul.yml -i hosts --check
 
-   # Install Consul only at one host
-   ansible-playbook consul.yml -i hosts --limit '10.254.239.2' -f 10 --check
+   # Install Consul Agent at one host only
+   ansible-playbook consul.yml -i hosts --limit '10.254.239.4' --check
+
+   # Install Consul Server at one host only (use max 3-5 servers in 1 DC)
+   ansible-playbook consul.yml -i hosts --limit '10.254.239.2' --extra-vars "mode=server" --check
 
    # Check Consul (will list alive and failed nodes)
    consul members
@@ -121,7 +129,7 @@ Listens on port 8102 on all addresses, connect to Redis running at
    # Install Dynomite at all "dynomite" hosts (defined in inventory)
 
    # Install Dynomite only at one host
-   ansible-playbook dynomite.yml -i hosts --limit '10.254.239.2' -f 10 --check
+   ansible-playbook dynomite.yml -i hosts --limit '10.254.239.2' --check
 
    # Test - terminal 1
    redis-cli -h 10.254.239.2 -p 8102
@@ -152,3 +160,12 @@ Listens on port 8102 on all addresses, connect to Redis running at
    This will run `ansible-playbook ...` on all 3 machines:
 
        make provision
+
+
+Examples
+--------
+
+.. code-block:: bash
+
+   # example-my-desktop.yml - my Desktop (Debian 9)
+   ansible-playbook example-my-desktop.yml -i hosts

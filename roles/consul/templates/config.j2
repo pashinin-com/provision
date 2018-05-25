@@ -5,7 +5,7 @@
 datacenter = "moscow"
 
 bootstrap = false
-server = true
+server = {{ 'true' if (mode == 'server') else 'false' }}
 data_dir = "/var/consul"
 
 # TRACE DEBUG INFO WARN ERR
@@ -13,6 +13,18 @@ log_level = "ERR"
 
 
 bind_addr="{{inventory_hostname}}"
+
+
+# Error after Agent started: failed to sync remote state: No known Consul servers
+# Solution: write "retry_join" list below
+# "192.168.1.11:8301",
+# "192.168.1.12:8301",
+# "192.168.1.13:8301"
+retry_join = [
+  "10.254.239.1",
+  "10.254.239.2",
+  "10.254.239.3"
+]
 
 addresses {
   # http = "{{inventory_hostname}}"

@@ -19,19 +19,7 @@
   when: not consultemplate.stat.exists
 
 
-# consul.service
-- name: Copy consul.service systemd script
-  copy:
-    src: files/consul.service
-    dest: /etc/systemd/system/consul.service
-    owner: root
-    group: root
-    mode: 0644
-  notify:
-    - restart consul
-
-# consul-template.service
-- name: Copy SystemD consul-template.service
+- name: Consul-Template systemd startup script
   copy:
     src: files/consul-template.service
     dest: /etc/systemd/system/consul-template.service
@@ -41,20 +29,14 @@
   notify:
     - restart consul-template
 
-# permissions
-- name: Check consul.service permissions
-  file:
-    path: /etc/systemd/system/consul.service
+- name: Agent/Server systemd sturtup script
+  template:
+    src: templates/systemd-consul.j2
+    dest: /etc/systemd/system/consul.service
+    # validate: '/usr/sbin/visudo -cf %s'
     mode: 0644
   notify:
     - restart consul
-- name: Check consul-template.service permissions
-  file:
-    path: /etc/systemd/system/consul-template.service
-    mode: 0644
-  notify:
-    - restart consul-template
-
 
 # Configs
 - name: Create data_dir (/var/consul)
@@ -69,6 +51,10 @@
     mode: 0755
 - file:
     path: /etc/consul.d/server
+    state: directory
+    mode: 0755
+- file:
+    path: /etc/consul.d/agent
     state: directory
     mode: 0755
 
@@ -87,20 +73,25 @@
 #   notify:
 #     - restart consul
 
+# 1. Error while starting Consul Agent: data_dir cannot be empty!
+#    Why happened: agent config was missing
 - name: Consul server configuration
   template:
     src: templates/config.j2
-    dest: /etc/consul.d/server/config.hcl
+    dest: /etc/consul.d/{{mode}}/config.hcl
     # validate: '/usr/sbin/visudo -cf %s'
   notify:
     - restart consul
 
+
+# to remove
 - name: Remove old config.json
   file:
     path: /etc/consul.d/server/config.json
     state: absent
   notify:
     - restart consul
+
 
 - name: Consul Template configuration
   copy:
@@ -113,12 +104,13 @@
     - restart consul-template
 
 
-
 - name: start and enable Consul
   systemd:
     name: consul
     state: started
     enabled: yes
+    daemon_reload: yes
+  # when: mode == 'server'
 
 
 - name: start and enable Consul-template
@@ -126,3 +118,4 @@
     name: consul-template
     state: started
     enabled: yes
+    daemon_reload: yes
