@@ -16,3 +16,10 @@ listener "tcp" {
 
 
 cluster_name = "testcluster"
+
+
+# Error reading secret/pashinin.com: Get
+# https://127.0.0.1:8200/v1/secret/pashinin.com: http: server gave HTTP
+# response to HTTPS client
+
+# This error is fixed by setting VAULT_ADDR=http://127.0.0.1:8200
