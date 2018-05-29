@@ -1,5 +1,2 @@
-vars:
-  exclusions:
-    - ./doc
-    - ./examples
-    - ./README.md
+version: 0.10.0
+currentversion: ''

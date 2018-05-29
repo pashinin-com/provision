@@ -65,7 +65,7 @@ Vault
 .. code-block:: bash
 
    # Install Vault only at one host
-   ansible-playbook vault.yml -i hosts --limit '10.254.239.2' -f 10 --check
+   ansible-playbook vault.yml -i hosts --limit '10.254.239.2' --check
 
 
 PostgreSQL
@@ -91,7 +91,7 @@ Downloads v0.10.0, extracts under /tmp/stolon/, copies bin files
 .. code-block:: bash
 
    # Install
-   ansible-playbook stolon.yml -i hosts --limit '10.254.239.2' -f 10 --check
+   ansible-playbook stolon.yml -i hosts --limit '10.254.239.2' --check
 
 
 Tarantool

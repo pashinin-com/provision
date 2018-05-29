@@ -1,7 +1,17 @@
-- stat: path=/usr/local/bin/stolonctl2
+- stat: path=/usr/local/bin/stolonctl
   register: stolonctl
-- stat: path=/tmp/stolon/stolon-v0.10.0-linux-amd64
+- stat: path=/tmp/stolon/stolon-v{{version}}-linux-amd64
   register: archive
+
+- name: Check installed version of Stolon and save it in "currentversion"
+  shell: stolonctl --version | grep version | cut -d' ' -f3 | cut -d'v' -f2
+  register: cv
+  ignore_errors: yes
+  no_log: True
+  changed_when: False
+  when: stolonctl.stat.exists
+- set_fact: currentversion={{cv.stdout|default('')}}
+  when: cv is defined
 
 
 - name: Stolon home dir
@@ -23,15 +33,15 @@
     path: /tmp/stolon
     state: directory
     mode: 0755
-  when: not stolonctl.stat.exists
+  when: not stolonctl.stat.exists or version != currentversion
 
-- name: Download and extract Stolon
+- name: Download and extract Stolon {{version}}, currently {{currentversion}}
   unarchive:
-    src: https://github.com/sorintlab/stolon/releases/download/v0.10.0/stolon-v0.10.0-linux-amd64.tar.gz
-    # src: https://github.com/sorintlab/stolon/releases/download/v0.7.0/stolon-v0.7.0-linux-amd64.tar.gz
+    src: https://github.com/sorintlab/stolon/releases/download/v{{version}}/stolon-v{{version}}-linux-amd64.tar.gz
     dest: /tmp/stolon
     remote_src: yes
-  when: not archive.stat.exists and not stolonctl.stat.exists
+  when: not stolonctl.stat.exists or version != currentversion
+  # when: not archive.stat.exists and not stolonctl.stat.exists
 
 - name: Copy binaries
   copy:
@@ -40,8 +50,17 @@
     owner: root
     mode: 755
   with_fileglob:
-    - /tmp/stolon/stolon-v0.10.0-linux-amd64/bin/*
-  when: not stolonctl.stat.exists
+    - /tmp/stolon/stolon-v{{version}}-linux-amd64/bin/*
+  when: not stolonctl.stat.exists or version != currentversion
+
+
+- name: Stop postgresql
+  systemd:
+    name: postgresql
+    state: stopped
+    enabled: yes
+
+
 
 - name: stolon-proxy systemd script
   template:

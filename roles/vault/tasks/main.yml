@@ -1,20 +1,24 @@
 # https://releases.hashicorp.com/consul/1.0.0/consul_1.0.0_linux_amd64.zip
-- stat: path=/usr/local/bin/vault
+- name: Check Vault binary file exist
+  stat: path=/usr/local/bin/vault
   register: vault
 
-- name: Vault version
-  shell: /usr/local/bin/vault version
-  register: v
+- name: Check installed version of Vault and save it in "currentversion"
+  shell: vault version | cut -d' ' -f2 | cut -d'v' -f2
+  register: cv
   ignore_errors: yes
   no_log: True
   changed_when: False
+  when: vault.stat.exists
+- set_fact: currentversion={{cv.stdout|default('')}}
+  when: cv is defined
 
-- name: Install Vault
+- name: Download and install Vault
   unarchive:
     src: https://releases.hashicorp.com/vault/{{version}}/vault_{{version}}_linux_amd64.zip
     dest: /usr/local/bin
     remote_src: yes
-  when: not vault.stat.exists or version not in v.stdout
+  when: not vault.stat.exists or version != currentversion
 
 
 - name: Create /etc/vault.d
