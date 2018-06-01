@@ -1,0 +1,99 @@
+- name: Check Nomad binary file exist
+  stat: path=/usr/local/bin/nomad
+  register: nomad
+
+- name: Check installed version of Nomad and save it in "currentversion"
+  shell: nomad -v | cut -d' ' -f2 | cut -d'v' -f2
+  register: cv
+  ignore_errors: yes
+  no_log: True
+  changed_when: False
+  when: nomad.stat.exists
+- set_fact: currentversion={{cv.stdout|default('')}}
+  when: cv is defined
+
+- name: Download and install Nomad {{version}}, installed {{currentversion}}
+  unarchive:
+    src: https://releases.hashicorp.com/nomad/{{version}}/nomad_{{version}}_linux_amd64.zip
+    dest: /usr/local/bin
+    remote_src: yes
+  when: not nomad.stat.exists or version != currentversion
+
+
+- name: Create /etc/nomad
+  file:
+    path: /etc/nomad
+    state: directory
+    mode: 0755
+
+
+- name: Create nomad.service.d
+  file:
+    path: /etc/systemd/system/nomad.service.d
+    state: directory
+    mode: 0700
+
+- name: ENV file
+  copy:
+    force: no
+    src: files/env.conf
+    dest: /etc/systemd/system/nomad.service.d/env.conf
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+    - restart nomad
+
+- name: Nomad systemd service
+  copy:
+    src: files/nomad.service
+    dest: /etc/systemd/system/nomad.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart nomad
+
+# - name: Vault config.hcl
+#   copy:
+#     src: files/vault.config.hcl
+#     dest: /etc/vault.d/config.hcl
+#     owner: root
+#     group: root
+#     mode: 0644
+#   notify:
+#     - restart vault
+
+- name: /etc/nomad/config.hcl
+  template:
+    src: templates/config.j2
+    dest: /etc/nomad/config.hcl
+    mode: 0644
+  notify:
+    - restart nomad
+
+- name: Remove old configs
+  file: state=absent  path={{item}}
+  with_items:
+    - /etc/nomad/server.hcl
+    - /etc/nomad/client.hcl
+
+  # apt_repository: repo={{item}}
+  # with_items:
+  #   - ppa:vbernat/haproxy-1.8
+
+- name: start and enable Nomad
+  systemd:
+    name: nomad
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+
+# - lineinfile:
+#     path: /etc/bash.bashrc
+#     regexp: '^VAULT_ADDR'
+#     line: 'VAULT_ADDR="http://127.0.0.1:8200"'
+#     # owner: root
+#     # group: root
+#     # mode: 0644

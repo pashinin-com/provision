@@ -1,0 +1,72 @@
+# -*- mode: hcl -*-
+bind_addr = "0.0.0.0"
+data_dir = "/var/lib/nomad"
+# region     = "europe"
+# datacenter = "moscow"
+
+advertise {
+  # This should be the IP of THIS MACHINE and must be routable by every node
+  # in your cluster
+  rpc = "{{inventory_hostname}}:4647"
+}
+
+{% if mode == 'server' or mode == 'both' %}
+server {
+  enabled = true
+  bootstrap_expect = 3  # I have 3 Nomad servers
+  retry_join = [
+    "10.254.239.1",
+    "10.254.239.2",
+    "10.254.239.3"
+  ]
+}
+{% endif %}
+
+{% if mode == 'client' or mode == 'both' %}
+client {
+  enabled       = true
+  # network_speed = 10
+  servers = ["10.254.239.1", "10.254.239.2", "10.254.239.3"]
+  options {
+    "driver.raw_exec.enable" = "1"
+  }
+}
+{% endif %}
+
+
+{% if mode == 'client' %}
+vault {
+  enabled     = true
+  address     = "http://vault.service.consul:8200"
+  # ca_path     = "/etc/certs/ca"
+  # cert_file   = "/var/certs/vault.crt"
+  # key_file    = "/var/certs/vault.key"
+}
+{% else %}
+vault {
+  enabled     = true
+  # ca_path     = "/etc/certs/ca"
+  # cert_file   = "/var/certs/vault.crt"
+  # key_file    = "/var/certs/vault.key"
+
+  # Address to communicate with Vault. The below is the default address if
+  # unspecified.
+  # address     = "https://vault.service.consul:8200"
+  address     = "http://vault.service.consul:8200"
+
+  # Setting the create_from_role option causes Nomad to create tokens for tasks
+  # via the provided role. This allows the role to manage what policies are
+  # allowed and disallowed for use by tasks.
+  create_from_role = "nomad-cluster"
+}
+{% endif %}
+
+consul {
+  # address = "consul.service.consul:8500"
+  address = "127.0.0.1:8500"
+  server_service_name = "nomad"
+  client_service_name = "nomad-client"
+  auto_advertise      = true
+  server_auto_join    = true
+  client_auto_join    = true
+}

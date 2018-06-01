@@ -1,0 +1,17 @@
+# -*- mode: conf -*-
+[Unit]
+Description=Nomad
+Documentation=https://nomadproject.io/docs/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+EnvironmentFile=/etc/systemd/system/nomad.service.d/env.conf
+KillMode=process
+KillSignal=SIGINT
+ExecStart=/usr/local/bin/nomad agent -config /etc/nomad
+ExecReload=/bin/kill -HUP $MAINPID
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

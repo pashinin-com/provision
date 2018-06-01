@@ -1,0 +1,6 @@
+---
+# https://releases.hashicorp.com/nomad/0.8.3/nomad_0.8.3_linux_amd64.zip
+version: 0.8.3
+currentversion: ''
+mode: 'client'  # 'client' or 'server' or 'both'
+# client should be on all nodes, server - on 3-5 nodes

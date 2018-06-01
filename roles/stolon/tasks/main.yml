@@ -54,12 +54,13 @@
   when: not stolonctl.stat.exists or version != currentversion
 
 
-- name: Stop postgresql
+- name: Stop and disable default Postgresql service (yes you need it)
   systemd:
     name: postgresql
     state: stopped
-    enabled: yes
-
+    enabled: no
+  notify:
+    - restart stolon-keeper
 
 
 - name: stolon-proxy systemd script

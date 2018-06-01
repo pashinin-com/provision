@@ -68,6 +68,23 @@ Vault
    ansible-playbook vault.yml -i hosts --limit '10.254.239.2' --check
 
 
+Nomad
+-----
+
+Nomad can run as client, server and both (client+server).
+
+.. code-block:: bash
+
+   # Clients (all nodes)
+   ansible-playbook nomad.yml -i hosts --limit '10.254.239.4' --check
+
+   # Servers (3-5)
+   ansible-playbook nomad.yml -i hosts --limit '10.254.239.2' --extra-vars "mode=server" --check
+
+   # Client and server (if you need)
+   ansible-playbook nomad.yml -i hosts --limit '10.254.239.1,10.254.239.2,10.254.239.3' --extra-vars "mode=both" --check
+
+
 PostgreSQL
 ----------
 
