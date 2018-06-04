@@ -41,10 +41,16 @@ job "nginx" {
           https = 443
         }
 
+        # A list of host_path:container_path strings to bind host paths
+        # to container paths
+        #
+        # "/path/on/host:/path/in/container",
+        # "relative/to/task:/also/in/container"
         volumes = [
           "custom/default.conf:/etc/nginx/conf.d/default.conf",
           "secret/fullchain.pem:/etc/nginx/ssl/fullchain.pem",
           "secret/cert.key:/etc/nginx/ssl/cert.key",
+          "/usr/data/local2/src/front/dist:/local/data",
         ]
       }
 
@@ -91,6 +97,7 @@ ssl_ciphers "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECD
 
             location / {
               root /local/data/;
+              index baumanka.html;
             }
           }
         EOH
